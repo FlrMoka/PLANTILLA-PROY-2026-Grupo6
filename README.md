@@ -9,7 +9,7 @@ Repositorio del grupo X para el proyecto del ramo *Proyecto Inicial (IWG400)* �
 | Miguel  Llancao   | @Miguelito160  | mllancao@usm.cl          | 202630029-3  |
 | Alejandro Muñoz   | @FlrMoka       | amunoznav@usm.cl         | 202630013-7  |
 | Camila FLores     | @cxtrasca      | cflorest@usm.cl          | 202630008-0  |
-| Nombre4 Apellido4 | @usuario4      | nombre4.apellido4@usm.cl | 200000000000 |
+| Evan Sosa         | @xDemonBossx   | ososa@usm.cl             | 202630045-5  |
 
 ## 📝 Descripción breve del proyecto
 
