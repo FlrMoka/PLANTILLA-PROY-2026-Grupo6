@@ -1,0 +1,121 @@
+#include <Wire.h>
+#include "MAX30100_PulseOximeter.h"
+
+// === Pines ===
+const int pinPot = 34;
+const int pinNTC = 35;
+
+// === Variables potenciómetro ===
+int valorPot = 0;
+int valorAntPot = 0;
+int contadorCiclos = 0;
+bool subidaDetectada = false;
+const int UMBRAL_POT = 20;
+
+// === Variables termistor NTC ===
+const int R_SERIE = 10000;       // Resistor en serie (10k)
+const int R_NOMINAL = 10000;     // Resistencia a 25°C
+const int BETA = 3950;           // Constante B
+const int T_NOMINAL = 25;        // Temperatura nominal
+
+// === MAX30100 ===
+PulseOximeter pox;
+uint32_t tsLastReport = 0;
+const uint32_t REPORTING_PERIOD_MS = 1000;
+
+// === Tiempo ===
+unsigned long tiempoInicio = 0;
+
+// Callback para latido detectado
+void onBeatDetected() {
+  Serial.println("Latido detectado");
+}
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+
+  // Inicializar MAX30100
+  if (!pox.begin()) {
+    Serial.println("Error: No se encontró el MAX30100");
+    while (1);
+  }
+  pox.setOnBeatDetectedCallback(onBeatDetected);
+
+  // Inicializar potenciómetro
+  valorAntPot = analogRead(pinPot);
+  tiempoInicio = millis();
+}
+
+void loop() {
+  // === 1. Conteo de ciclos del potenciómetro ===
+  valorPot = analogRead(pinPot);
+  if (!subidaDetectada && valorPot > valorAntPot + UMBRAL_POT) {
+    subidaDetectada = true;
+  }
+  if (subidaDetectada && valorPot < valorAntPot - UMBRAL_POT) {
+    contadorCiclos++;
+    Serial.print("Ciclo completado. Total: ");
+    Serial.println(contadorCiclos);
+    subidaDetectada = false;
+  }
+  valorAntPot = valorPot;
+
+  // === 2. Lectura del termistor NTC ===
+  int lecturaNTC = analogRead(pinNTC);
+  float resistencia = R_SERIE / ((4095.0 / lecturaNTC) - 1.0);
+  float temperatura = 1.0 / (log(resistencia / R_NOMINAL) / BETA + 1.0 / (T_NOMINAL + 273.15)) - 273.15;
+
+  Serial.print("Temp: ");
+  Serial.print(temperatura, 1);
+  Serial.print(" °C - ");
+
+  if (temperatura >= 36.4 && temperatura <= 37.2) {
+    Serial.println("Normal");
+  } else if (temperatura > 37.9) {
+    Serial.println("ALERTA: Fiebre");
+  } else if (temperatura < 36.0) {
+    Serial.println("ALERTA: Hipotermia");
+  } else {
+    Serial.println("Fuera de rango crítico");
+  }
+
+  // === 3. Lectura del MAX30100 ===
+  pox.update();
+
+  if (millis() - tsLastReport >= REPORTING_PERIOD_MS) {
+    float bpm = pox.getHeartRate();
+    float spo2 = pox.getSpO2();
+
+    if (bpm > 0) {
+      Serial.print("Ritmo cardíaco: ");
+      Serial.print(bpm);
+      Serial.print(" bpm - ");
+
+      if (bpm < 70) {
+        Serial.println("ALERTA: Bradicardia");
+      } else if (bpm > 160) {
+        Serial.println("ALERTA: Taquicardia");
+      } else {
+        Serial.println("Normal");
+      }
+    }
+
+    if (spo2 > 0) {
+      Serial.print("Saturación O2: ");
+      Serial.print(spo2);
+      Serial.println("%");
+    }
+
+    tsLastReport = millis();
+  }
+
+  // === Fin del conteo a 60 segundos ===
+  if (millis() - tiempoInicio >= 60000) {
+    Serial.print("Ciclos totales en 1 minuto: ");
+    Serial.println(contadorCiclos);
+    while (true); // Detener
+  }
+
+  delay(10);
+}
