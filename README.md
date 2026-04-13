@@ -46,12 +46,12 @@ Mientras los valores nombrados anteriormente se mantengan en los rangos establec
 ## 🗂️ Estructura del repositorio
 
 ```
-/PROY-2026-GRUPOX
+/PROY-2026-GRUPO-Grupo6
 │
 ├── docs/               # Documentación general y reportes
 ├── src/                # Código fuente del proyecto
 ├── tests/              # Casos de prueba
-├── assets/             # Imágenes, diagramas, etc.
+├── Imagenes/ 
 └── README.md           # Este archivo
 ```
 
@@ -67,15 +67,15 @@ Mientras los valores nombrados anteriormente se mantengan en los rangos establec
 ---
 
 ## 📐 Diseño del Sistema
-![Diagrama de Conexiones](.Imagenes/Diseño%20Sistema.jpg)
+![Diagrama de Conexiones](.Imagenes/design.jpg)
 
-*Explicacion grafica de como es la conexion entre el microcontrolador y los sensores*
+-Imagen ilustrativa de como se vería las conexiónes de nuestro proyecto.
 
 ---
 
 ## 📅 Cronograma de trabajo
 
-[Carta Gantt](https://google.com)
+[Carta Gantt](https://usmcl-my.sharepoint.com/:x:/g/personal/cflorest_usm_cl/IQBMn-xOXonNRIqmBjaSvqLRAXTBRb4JK0oXyoDaD-OnSwc?e=4hwgP9)
 
 ---
 
@@ -87,4 +87,5 @@ Mientras los valores nombrados anteriormente se mantengan en los rangos establec
 
 ## 📌 Notas adicionales
 
-> *Espacio para dejar cualquier comentario útil, como pendientes, acuerdos del grupo, consideraciones especiales, etc.*
+>Conseguír Sensores Termicos y hacerlos funcionar con arduino. 
+*Espacio para dejar cualquier comentario útil, como pendientes, acuerdos del grupo, consideraciones especiales, etc.*
