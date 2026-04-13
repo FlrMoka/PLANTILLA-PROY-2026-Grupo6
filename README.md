@@ -21,10 +21,10 @@ Mientras los valores nombrados anteriormente se mantengan en los rangos establec
 ## 🎯 Objetivos
 
 - Objetivo general:
-  - *Describir el objetivo principal del proyecto.*
+  - Facilitar la monitorización de signos vitales en personas pertenecientes a la tercera edad.
 - Objetivos específicos:
-  - *Listar objetivos concretos que permitirán alcanzar el objetivo general.*
-
+  - Tener un aviso facil para saber si la temperatura de la persona está en el rango aceptable de temperaturas (Considerando su edad )
+  - Tener manera de darse cuenta sin un electrocardiograma su pulso y oxigeno en sangre de manera facil y accesible para gente de bajos recursos (en lo posible)
 ---
 
 ## 🧩 Alcance del proyecto
