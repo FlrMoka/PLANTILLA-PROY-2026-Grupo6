@@ -67,7 +67,7 @@ Mientras los valores nombrados anteriormente se mantengan en los rangos establec
 ---
 
 ## 📐 Diseño del Sistema
-![Diagrama de Conexiones](./assets/diagrama_conexiones.png)
+![Diagrama de Conexiones](.Imagenes/Diseño%20Sistema.jpg)
 
 *Explicacion grafica de como es la conexion entre el microcontrolador y los sensores*
 
