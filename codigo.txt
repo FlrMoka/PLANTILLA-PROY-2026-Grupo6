@@ -73,20 +73,20 @@ void loop() {
     }
 
     Serial.print("T: "); Serial.print(temperaturaC, 1); Serial.print("C (");
-    if (temperaturaC <= 35.5) Serial.print("HIPOTERMIA");
+    if (temperaturaC <= 35.0) Serial.print("HIPOTERMIA");
     else if (temperaturaC >= 38.0) Serial.print("FIEBRE");
     else Serial.print("Normal");
     Serial.print(") | ");
 
     if (movimientoValido) {
-      if (rpmPromedio > 60) {
+      if (rpmPromedio > 25.0) {
         if (inicioTaquipnea == 0) inicioTaquipnea = currentTime;
         if (currentTime - inicioTaquipnea >= TIEMPO_PERSISTENCIA) {
           Serial.print("!!! TAQUIPNEA !!! | RPM: "); Serial.println(rpmPromedio);
         } else { Serial.print("Evaluando... | RPM: "); Serial.println(rpmPromedio); }
         inicioApnea = 0;
       } 
-      else if (rpmPromedio < 30 || (currentTime - lastRespTime >= 15000)) {
+      else if (rpmPromedio < 12.0 || (currentTime - lastRespTime >= 15000)) {
         if (inicioApnea == 0) inicioApnea = currentTime;
         if (currentTime - inicioApnea >= TIEMPO_PERSISTENCIA) {
           Serial.print("!!! APNEA !!! | RPM: "); Serial.println(rpmPromedio);
