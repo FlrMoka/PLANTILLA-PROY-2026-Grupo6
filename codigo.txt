@@ -1,121 +1,114 @@
 #include <Wire.h>
-#include "MAX30100_PulseOximeter.h"
+#include <Adafruit_Sensor.h>
+#include <Adafruit_ADXL345_U.h>
 
-// === Pines ===
-const int pinPot = 34;
-const int pinNTC = 35;
+#define ADXL345_CLK  12
+#define ADXL345_MISO 10
+#define ADXL345_MOSI 11
+#define ADXL345_CS   8
+const int pinSensor = A0;
 
-// === Variables potenciómetro ===
-int valorPot = 0;
-int valorAntPot = 0;
-int contadorCiclos = 0;
-bool subidaDetectada = false;
-const int UMBRAL_POT = 20;
+Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified(ADXL345_CLK, ADXL345_MISO, ADXL345_MOSI, ADXL345_CS, 12345);
 
-// === Variables termistor NTC ===
-const int R_SERIE = 10000;       // Resistor en serie (10k)
-const int R_NOMINAL = 10000;     // Resistencia a 25°C
-const int BETA = 3950;           // Constante B
-const int T_NOMINAL = 25;        // Temperatura nominal
-
-// === MAX30100 ===
-PulseOximeter pox;
-uint32_t tsLastReport = 0;
-const uint32_t REPORTING_PERIOD_MS = 1000;
-
-// === Tiempo ===
-unsigned long tiempoInicio = 0;
-
-// Callback para latido detectado
-void onBeatDetected() {
-  Serial.println("Latido detectado");
-}
+float lastY = 0;
+unsigned long lastRespTime = 0;
+float rpmPromedio = 0;
+float sumaRPM = 0;
+int conteoLecturas = 0;
+unsigned long ventanaTiempo = 0;
+unsigned long inicioTaquipnea = 0;
+unsigned long inicioApnea = 0;
+const unsigned long TIEMPO_PERSISTENCIA = 3000; 
+float lastX = 0, lastZ = 0;
+unsigned long lastCheckTime = 0;
+bool movimientoValido = true;
 
 void setup() {
-  Serial.begin(115200);
-  Wire.begin();
-
-  // Inicializar MAX30100
-  if (!pox.begin()) {
-    Serial.println("Error: No se encontró el MAX30100");
-    while (1);
+  Serial.begin(9600);
+  if(!accel.begin()) {
+    while(1);
   }
-  pox.setOnBeatDetectedCallback(onBeatDetected);
-
-  // Inicializar potenciómetro
-  valorAntPot = analogRead(pinPot);
-  tiempoInicio = millis();
+  accel.setRange(ADXL345_RANGE_2_G);
+  lastRespTime = millis();
+  ventanaTiempo = millis();
 }
 
 void loop() {
-  // === 1. Conteo de ciclos del potenciómetro ===
-  valorPot = analogRead(pinPot);
-  if (!subidaDetectada && valorPot > valorAntPot + UMBRAL_POT) {
-    subidaDetectada = true;
-  }
-  if (subidaDetectada && valorPot < valorAntPot - UMBRAL_POT) {
-    contadorCiclos++;
-    Serial.print("Ciclo completado. Total: ");
-    Serial.println(contadorCiclos);
-    subidaDetectada = false;
-  }
-  valorAntPot = valorPot;
+  sensors_event_t event;
+  accel.getEvent(&event);
+  unsigned long currentTime = millis();
 
-  // === 2. Lectura del termistor NTC ===
-  int lecturaNTC = analogRead(pinNTC);
-  float resistencia = R_SERIE / ((4095.0 / lecturaNTC) - 1.0);
-  float temperatura = 1.0 / (log(resistencia / R_NOMINAL) / BETA + 1.0 / (T_NOMINAL + 273.15)) - 273.15;
-
-  Serial.print("Temp: ");
-  Serial.print(temperatura, 1);
-  Serial.print(" °C - ");
-
-  if (temperatura >= 36.4 && temperatura <= 37.2) {
-    Serial.println("Normal");
-  } else if (temperatura > 37.9) {
-    Serial.println("ALERTA: Fiebre");
-  } else if (temperatura < 36.0) {
-    Serial.println("ALERTA: Hipotermia");
-  } else {
-    Serial.println("Fuera de rango crítico");
+  if (currentTime - lastCheckTime >= 500) {
+    float diffX = abs(event.acceleration.x - lastX);
+    float diffY = abs(event.acceleration.y - lastY);
+    float diffZ = abs(event.acceleration.z - lastZ);
+    movimientoValido = (diffX < 1.50 && diffY < 1.50 && diffZ < 1.50);
+    lastX = event.acceleration.x;
+    lastZ = event.acceleration.z;
+    lastCheckTime = currentTime;
   }
 
-  // === 3. Lectura del MAX30100 ===
-  pox.update();
+  float currentY = event.acceleration.y;
+  float diffY_resp = abs(currentY - lastY);
 
-  if (millis() - tsLastReport >= REPORTING_PERIOD_MS) {
-    float bpm = pox.getHeartRate();
-    float spo2 = pox.getSpO2();
+  if (movimientoValido && diffY_resp >= 0.2) {
+    if (currentTime - lastRespTime > 700) { 
+      unsigned long timeGap = currentTime - lastRespTime;
+      float rpmInstantanea = 60000.0 / timeGap;
+      sumaRPM += rpmInstantanea;
+      conteoLecturas++;
+      lastRespTime = currentTime;
+    }
+  }
 
-    if (bpm > 0) {
-      Serial.print("Ritmo cardíaco: ");
-      Serial.print(bpm);
-      Serial.print(" bpm - ");
+  if (currentTime - ventanaTiempo >= 1000) {
+    int lecturaRaw = analogRead(pinSensor);
+    float voltaje = lecturaRaw * (5000.0 / 1023.0);
+    float temperaturaC = (voltaje - 1035.0) / -5.5;
 
-      if (bpm < 70) {
-        Serial.println("ALERTA: Bradicardia");
-      } else if (bpm > 160) {
-        Serial.println("ALERTA: Taquicardia");
-      } else {
-        Serial.println("Normal");
+    if (conteoLecturas > 0) {
+      rpmPromedio = sumaRPM / conteoLecturas;
+    } else if (currentTime - lastRespTime >= 15000) {
+      rpmPromedio = 0; 
+    }
+
+    Serial.print("T: "); Serial.print(temperaturaC, 1); Serial.print("C (");
+    if (temperaturaC <= 35.5) Serial.print("HIPOTERMIA");
+    else if (temperaturaC >= 38.0) Serial.print("FIEBRE");
+    else Serial.print("Normal");
+    Serial.print(") | ");
+
+    if (movimientoValido) {
+      if (rpmPromedio > 60) {
+        if (inicioTaquipnea == 0) inicioTaquipnea = currentTime;
+        if (currentTime - inicioTaquipnea >= TIEMPO_PERSISTENCIA) {
+          Serial.print("!!! TAQUIPNEA !!! | RPM: "); Serial.println(rpmPromedio);
+        } else { Serial.print("Evaluando... | RPM: "); Serial.println(rpmPromedio); }
+        inicioApnea = 0;
+      } 
+      else if (rpmPromedio < 30 || (currentTime - lastRespTime >= 15000)) {
+        if (inicioApnea == 0) inicioApnea = currentTime;
+        if (currentTime - inicioApnea >= TIEMPO_PERSISTENCIA) {
+          Serial.print("!!! APNEA !!! | RPM: "); Serial.println(rpmPromedio);
+        } else { Serial.print("Evaluando... | RPM: "); Serial.println(rpmPromedio); }
+        inicioTaquipnea = 0;
+      } 
+      else {
+        Serial.print("Resp: NORMAL | RPM: "); Serial.println(rpmPromedio);
+        inicioTaquipnea = 0;
+        inicioApnea = 0;
       }
+    } else {
+      Serial.println("MOVIMIENTO DETECTADO");
+      inicioTaquipnea = 0;
+      inicioApnea = 0;
     }
 
-    if (spo2 > 0) {
-      Serial.print("Saturación O2: ");
-      Serial.print(spo2);
-      Serial.println("%");
-    }
-
-    tsLastReport = millis();
+    sumaRPM = 0;
+    conteoLecturas = 0;
+    ventanaTiempo = currentTime;
   }
 
-  // === Fin del conteo a 60 segundos ===
-  if (millis() - tiempoInicio >= 60000) {
-    Serial.print("Ciclos totales en 1 minuto: ");
-    Serial.println(contadorCiclos);
-    while (true); // Detener
-  }
-
-  delay(10);
+  lastY = currentY;
+  delay(50); 
 }
