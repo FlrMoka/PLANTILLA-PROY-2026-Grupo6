@@ -13,8 +13,8 @@ Repositorio del grupo X para el proyecto del ramo *Proyecto Inicial (IWG400)* �
 
 ## 📝 Descripción breve del proyecto
 
-> *Medidor de signos vitales y caídas para gente de tercera edad, para lograr el monitoreo constante de pulsaciones por minuto, oxígeno en sangre, respiraciones por minuto, temperatura y posibles caídas. 
-Mientras los valores nombrados anteriormente se mantengan en los rangos establecidos como normales para su edad, tan solo se entregará en la pantalla los valores médicos, junto con un consejo para mantenerse o volver a los rangos normales. En el caso contrario, es decir, cuando estos valores se encuentren alterados o con diferencias significativas, se envía una alerta a la persona que este a cargo del cuidado de la persona de tercera edad, a través de Arduino Uno Q mediante vía wi-fi local hacia la pantalla TFT, la cual activará un buzzer que emitirá un sonido para alertar esto.*
+> *Medidor de signos vitales y caídas para bebés, para lograr el monitoreo constante de pulsaciones por minuto, oxígeno en sangre, respiraciones por minuto, temperatura y posibles caídas. 
+Mientras los valores nombrados anteriormente se mantengan en los rangos establecidos como normales para su edad, tan solo se entregará en la pantalla los valores médicos, junto con un consejo para mantenerse o volver a los rangos normales. En el caso contrario, es decir, cuando estos valores se encuentren alterados o con diferencias significativas, se envía una alerta a la persona que este a cargo del cuidado del infante, a través de Arduino Uno Q mediante vía wi-fi local hacia la pantalla TFT, la cual activará un buzzer que emitirá un sonido para alertar esto.*
 
 ---
 
