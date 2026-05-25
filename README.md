@@ -21,10 +21,10 @@ Mientras los valores nombrados anteriormente se mantengan en los rangos establec
 ## 🎯 Objetivos
 
 - Objetivo general:
-  - Facilitar la monitorización de signos vitales en personas pertenecientes a la tercera edad.
+  - Facilitar la monitorización de signos vitales en personas pertenecientes a infantes.
 - Objetivos específicos:
-  - Tener un aviso facil para saber si la temperatura de la persona está en el rango aceptable de temperaturas (Considerando su edad ).
-  - Tener manera de darse cuenta sin un electrocardiograma su pulso y oxigeno en sangre de manera facil y accesible para gente de bajos recursos (en lo posible).
+  - Tener un aviso facil para saber si la temperatura de la persona está en el rango aceptable de temperaturas (Considerando su edad )
+  - Para que los padres tengan un poco más de tranquilidad a la hora del horario de sueño.
 ---
 
 ## 🧩 Alcance del proyecto
@@ -38,8 +38,8 @@ Mientras los valores nombrados anteriormente se mantengan en los rangos establec
 - Lenguaje(s) de programación:
   - Ej: Python, JavaScript, C++
 - Microcontroladores
-  - Arduino UNO Q, ESP32
-- Sensores
+  - Arduino UNO Q, Arduino nano 
+- Sensor 
 
 ---
 
