@@ -39,7 +39,7 @@ Mientras los valores nombrados anteriormente se mantengan en los rangos establec
   - Ej: Python, JavaScript, C++
 - Microcontroladores
   - Arduino UNO Q, Arduino nano 
-- Sensor 
+- Sensores LMT84LPM, ADXL345
 
 ---
 
