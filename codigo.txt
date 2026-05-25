@@ -5,30 +5,43 @@
 #define ADXL345_CLK  12
 #define ADXL345_MISO 10
 #define ADXL345_MOSI 11
-#define ADXL345_CS   8
+#define ADXL345_CS    8
 const int pinSensor = A0;
 
 Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified(ADXL345_CLK, ADXL345_MISO, ADXL345_MOSI, ADXL345_CS, 12345);
 
-float lastY = 0;
+float lastY_resp = 0;
 unsigned long lastRespTime = 0;
 float rpmPromedio = 0;
 float sumaRPM = 0;
 int conteoLecturas = 0;
-unsigned long ventanaTiempo = 0;
-unsigned long inicioTaquipnea = 0;
-unsigned long inicioApnea = 0;
-const unsigned long TIEMPO_PERSISTENCIA = 3000; 
-float lastX = 0, lastZ = 0;
+
+float lastX_mov = 0, lastY_mov = 0, lastZ_mov = 0;
 unsigned long lastCheckTime = 0;
 bool movimientoValido = true;
 
+unsigned long ventanaTiempo = 0;
+unsigned long inicioTaquipnea = 0;
+unsigned long inicioApnea = 0;
+const unsigned long TIEMPO_PERSISTENCIA = 3000;
+
 void setup() {
   Serial.begin(9600);
+  
   if(!accel.begin()) {
     while(1);
   }
+
   accel.setRange(ADXL345_RANGE_2_G);
+
+  sensors_event_t event;
+  accel.getEvent(&event);
+
+  lastX_mov = event.acceleration.x;
+  lastY_mov = event.acceleration.y;
+  lastZ_mov = event.acceleration.z;
+  lastY_resp = event.acceleration.y;
+
   lastRespTime = millis();
   ventanaTiempo = millis();
 }
@@ -39,27 +52,33 @@ void loop() {
   unsigned long currentTime = millis();
 
   if (currentTime - lastCheckTime >= 500) {
-    float diffX = abs(event.acceleration.x - lastX);
-    float diffY = abs(event.acceleration.y - lastY);
-    float diffZ = abs(event.acceleration.z - lastZ);
+    float diffX = abs(event.acceleration.x - lastX_mov);
+    float diffY = abs(event.acceleration.y - lastY_mov);
+    float diffZ = abs(event.acceleration.z - lastZ_mov);
+
     movimientoValido = (diffX < 1.50 && diffY < 1.50 && diffZ < 1.50);
-    lastX = event.acceleration.x;
-    lastZ = event.acceleration.z;
+
+    lastX_mov = event.acceleration.x;
+    lastY_mov = event.acceleration.y;
+    lastZ_mov = event.acceleration.z;
     lastCheckTime = currentTime;
   }
 
   float currentY = event.acceleration.y;
-  float diffY_resp = abs(currentY - lastY);
+  float diffY_resp = abs(currentY - lastY_resp);
 
-  if (movimientoValido && diffY_resp >= 0.2) {
-    if (currentTime - lastRespTime > 700) { 
+  if (movimientoValido && diffY_resp >= 0.5) {
+    if (currentTime - lastRespTime > 700) {
       unsigned long timeGap = currentTime - lastRespTime;
       float rpmInstantanea = 60000.0 / timeGap;
+
       sumaRPM += rpmInstantanea;
       conteoLecturas++;
       lastRespTime = currentTime;
     }
   }
+
+  lastY_resp = currentY;
 
   if (currentTime - ventanaTiempo >= 1000) {
     int lecturaRaw = analogRead(pinSensor);
@@ -68,38 +87,66 @@ void loop() {
 
     if (conteoLecturas > 0) {
       rpmPromedio = sumaRPM / conteoLecturas;
-    } else if (currentTime - lastRespTime >= 15000) {
-      rpmPromedio = 0; 
+    } else {
+      if (currentTime - lastRespTime >= 15000) {
+        rpmPromedio = 0;
+      } else {
+        rpmPromedio = 0;
+      }
     }
 
-    Serial.print("T: "); Serial.print(temperaturaC, 1); Serial.print("C (");
-    if (temperaturaC <= 35.0) Serial.print("HIPOTERMIA");
-    else if (temperaturaC >= 38.0) Serial.print("FIEBRE");
-    else Serial.print("Normal");
+    Serial.print("T: ");
+    Serial.print(temperaturaC, 1);
+    Serial.print("C (");
+
+    if (temperaturaC <= 35.5)
+      Serial.print("HIPOTERMIA");
+    else if (temperaturaC >= 38.0)
+      Serial.print("FIEBRE");
+    else
+      Serial.print("Normal");
+
     Serial.print(") | ");
 
     if (movimientoValido) {
-      if (rpmPromedio > 25.0) {
-        if (inicioTaquipnea == 0) inicioTaquipnea = currentTime;
+      if (rpmPromedio > 60) {
+        if (inicioTaquipnea == 0)
+          inicioTaquipnea = currentTime;
+
         if (currentTime - inicioTaquipnea >= TIEMPO_PERSISTENCIA) {
-          Serial.print("!!! TAQUIPNEA !!! | RPM: "); Serial.println(rpmPromedio);
-        } else { Serial.print("Evaluando... | RPM: "); Serial.println(rpmPromedio); }
+          Serial.print("!!! TAQUIPNEA !!! | RPM: ");
+          Serial.println(rpmPromedio);
+        } else {
+          Serial.print("Evaluando... | RPM: ");
+          Serial.println(rpmPromedio);
+        }
+
         inicioApnea = 0;
-      } 
-      else if (rpmPromedio < 12.0 || (currentTime - lastRespTime >= 15000)) {
-        if (inicioApnea == 0) inicioApnea = currentTime;
+      }
+      else if (rpmPromedio < 30 || (currentTime - lastRespTime >= 15000)) {
+        if (inicioApnea == 0)
+          inicioApnea = currentTime;
+
         if (currentTime - inicioApnea >= TIEMPO_PERSISTENCIA) {
-          Serial.print("!!! APNEA !!! | RPM: "); Serial.println(rpmPromedio);
-        } else { Serial.print("Evaluando... | RPM: "); Serial.println(rpmPromedio); }
+          Serial.print("!!! APNEA !!! | RPM: ");
+          Serial.println(rpmPromedio);
+        } else {
+          Serial.print("Evaluando... | RPM: ");
+          Serial.println(rpmPromedio);
+        }
+
         inicioTaquipnea = 0;
-      } 
+      }
       else {
-        Serial.print("Resp: NORMAL | RPM: "); Serial.println(rpmPromedio);
+        Serial.print("Resp: NORMAL | RPM: ");
+        Serial.println(rpmPromedio);
+
         inicioTaquipnea = 0;
         inicioApnea = 0;
       }
-    } else {
-      Serial.println("MOVIMIENTO DETECTADO");
+    }
+    else {
+      Serial.println("MOVIMIENTO PARÁSITO DETECTADO");
       inicioTaquipnea = 0;
       inicioApnea = 0;
     }
@@ -109,6 +156,5 @@ void loop() {
     ventanaTiempo = currentTime;
   }
 
-  lastY = currentY;
-  delay(50); 
+  delay(10);
 }
