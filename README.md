@@ -8,7 +8,7 @@ Repositorio del grupo 6 para el proyecto del ramo *Proyecto Inicial (IWG400)* �
 | ----------------- | -------------- | ------------------------ | ------------ |
 | Miguel  Llancao   | @Miguelito160  | mllancao@usm.cl          | 202630029-3  |
 | Alejandro Muñoz   | @FlrMoka       | amunoznav@usm.cl         | 202630013-7  |
-| Camila FLores     | @cxtrasca      | cflorest@usm.cl          | 202630008-0  |
+| Camila Aburto     | @cxtrasca      | cflorest@usm.cl          | 202630008-0  |
 | Evan Sosa         | @xDemonBossx   | ososa@usm.cl             | 202630045-5  |
 
 ## 📝 Descripción breve del proyecto
