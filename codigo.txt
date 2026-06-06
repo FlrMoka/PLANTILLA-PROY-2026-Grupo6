@@ -5,28 +5,23 @@
 
 const char* ssid = "Wifi_Mesh-43A00CB6";
 const char* password = "fVqkmc4x";
-
-// IP actualizada al servidor Python de Arduino App Lab
 const char* serverName = "http://192.168.1.52:8080/data";
 
 #define TEMP_PIN 34
 
 MPU9250_asukiaaa mpu;
 
-// --- VARIABLES PARA EL PROMEDIO MÓVIL DE RPM ---
 const int NUM_LECTURAS = 3;
 float lecturasRPM[NUM_LECTURAS];
 int indiceLectura = 0;
 float sumaRPMTotal = 0;
 float rpmPromedioFinal = 0;
 
-// --- CONTROL DE RESPIRACIÓN (EJE Y) ---
 float yPromedio = 0;
 unsigned long lastRespTime = 0;
 bool arriba = false;
 unsigned long ultimaTransmision = 0;
 
-// --- CONTROL DE REPOSO / DETECCIÓN DE 0 RPM ---
 unsigned long ultimoMovimientoValidoTime = 0;
 
 void setup() {
@@ -50,17 +45,19 @@ void setup() {
   for (int i = 0; i < NUM_LECTURAS; i++) {
     lecturasRPM[i] = 0;
   }
+
   sumaRPMTotal = 0;
   rpmPromedioFinal = 0;
 
   WiFi.begin(ssid, password);
+
   Serial.print("Conectando a WiFi");
+
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
 
-  // ⬇️ AQUÍ SE AÑADIÓ TU FRAGMENTO REEMPLAZANDO LA LÍNEA ANTIGUA
   Serial.println("\nWiFi conectado.");
   Serial.println("IP: " + WiFi.localIP().toString());
   Serial.println("Gateway: " + WiFi.gatewayIP().toString());
@@ -76,36 +73,38 @@ void loop() {
   unsigned long currentTime = millis();
   float currentY = mpu.accelY();
 
-  // Filtro pasa-bajas para suavizar la señal
   yPromedio = 0.93 * yPromedio + 0.07 * currentY;
   float diffY_resp = currentY - yPromedio;
 
-  // Si el delta es mayor a 0.008, hay movimiento significativo
   if (abs(diffY_resp) > 0.008) {
     ultimoMovimientoValidoTime = currentTime;
   }
 
-  // --- DETECTOR DE RESPIRACIÓN ---
   if (!arriba && diffY_resp > 0.02) {
     arriba = true;
 
     unsigned long timeGap = currentTime - lastRespTime;
 
-    // Filtro: ciclo respiratorio entre 1.2 y 8 segundos
     if (timeGap >= 1200 && timeGap <= 8000) {
       float rpmInstantnea = 60000.0 / timeGap;
 
       sumaRPMTotal = sumaRPMTotal - lecturasRPM[indiceLectura];
       lecturasRPM[indiceLectura] = rpmInstantnea;
       sumaRPMTotal = sumaRPMTotal + lecturasRPM[indiceLectura];
+
       indiceLectura = (indiceLectura + 1) % NUM_LECTURAS;
       rpmPromedioFinal = sumaRPMTotal / NUM_LECTURAS;
 
-      Serial.printf("\n---> [RESPIRACIÓN] Ciclo: %.2fs | RPM Inst: %.1f | Promedio: %.1f\n\n",
-                    timeGap / 1000.0, rpmInstantnea, rpmPromedioFinal);
+      Serial.printf(
+        "\n---> [RESPIRACIÓN] Ciclo: %.2fs | RPM Inst: %.1f | Promedio: %.1f\n\n",
+        timeGap / 1000.0,
+        rpmInstantnea,
+        rpmPromedioFinal
+      );
 
       lastRespTime = currentTime;
-    } else if (timeGap > 8000) {
+    }
+    else if (timeGap > 8000) {
       lastRespTime = currentTime;
     }
   }
@@ -114,23 +113,27 @@ void loop() {
     arriba = false;
   }
 
-  // --- AUTO-CERO: si hay más de 7s de inactividad → RPM = 0 ---
   if (currentTime - ultimoMovimientoValidoTime > 7000) {
     rpmPromedioFinal = 0;
     sumaRPMTotal = 0;
+
     for (int i = 0; i < NUM_LECTURAS; i++) {
       lecturasRPM[i] = 0;
     }
   }
 
-  // --- ENVÍO HTTP CADA 5 SEGUNDOS ---
   if (currentTime - ultimaTransmision >= 5000) {
     int lectura = analogRead(TEMP_PIN);
+
     float voltaje = lectura * (3300.0 / 4095.0);
     float temperatura = (1035.0 - voltaje) / 8.0;
 
-    Serial.printf("Temp: %.1f C | RPM: %.0f | DeltaY: %.4f\n",
-                  temperatura, rpmPromedioFinal, diffY_resp);
+    Serial.printf(
+      "Temp: %.1f C | RPM: %.0f | DeltaY: %.4f\n",
+      temperatura,
+      rpmPromedioFinal,
+      diffY_resp
+    );
 
     if (WiFi.status() == WL_CONNECTED) {
       WiFiClient client;
@@ -139,10 +142,11 @@ void loop() {
       http.setTimeout(1500);
       http.begin(client, serverName);
 
-      // Cambiado a JSON para coincidir con el servidor Python
       http.addHeader("Content-Type", "application/json");
-      String body = "{\"temp\":" + String(temperatura, 1) +
-                    ",\"rpm\":"   + String(rpmPromedioFinal, 0) + "}";
+
+      String body =
+        "{\"temp\":" + String(temperatura, 1) +
+        ",\"rpm\":" + String(rpmPromedioFinal, 0) + "}";
 
       int codigo = http.POST(body);
 
@@ -154,7 +158,8 @@ void loop() {
       }
 
       http.end();
-    } else {
+    }
+    else {
       Serial.println("WiFi perdido, reconectando...");
       WiFi.reconnect();
     }
