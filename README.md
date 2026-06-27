@@ -35,8 +35,18 @@ Repositorio del grupo 6 para el proyecto del ramo *Proyecto Inicial (IWG400)* �
 
 ## 🧩 Alcance del proyecto
 
-> *Definir qué aspectos cubre el proyecto y qué queda fuera del alcance (limitaciones).*
+Cubre:
+* Medición de temperatura corporal y frecuencia respiratoria del lactante mediante sensores conectados al ESP32.
+* Transmisión inalámbrica de los datos a un servidor web.
+* Visualización en tiempo real de los datos en una página web.
+* Alertas automáticas cuando los valores salen de los rangos normales según la edad.
 
+No cubre (limitaciones):
+* No reemplaza la supervisión médica ni constituye un diagnóstico clínico.
+* No mide otros signos vitales (oxigenación, ritmo cardíaco, etc.).
+* No incluye notificaciones móviles, solo alertas en la página web.
+* No ha sido validado clínicamente en lactantes reales; es un prototipo.
+*
 ---
 
 ## 🛠️ Tecnologías y herramientas utilizadas
@@ -63,13 +73,37 @@ Repositorio del grupo 6 para el proyecto del ramo *Proyecto Inicial (IWG400)* �
 
 ---
 
-## 🚀 Instrucciones de Instalacion y Uso
+## 🚀 Instrucciones de Instalación y Uso
 
+1. **Clonar el repositorio:**
+   ```
+   git clone https://github.com/tu-usuario/tu-repositorio.git
+   ```
 
-1. **Clonar el repositorio:** `git clone ...`
-2. **Dependencias:** Listar qué librerías necesitan (ej: `pip install -r requirements.txt` o librerías de Arduino).
-3. **Ejecución:** Cómo se corre el código principal.
+2. **Dependencias (Arduino/ESP32):**
 
+   Desde el Arduino IDE, instalar las siguientes librerías (Herramientas → Administrar Bibliotecas):
+   * `WiFi.h` (incluida por defecto con el core de ESP32)
+   * `HTTPClient.h` (incluida por defecto con el core de ESP32)
+   * `Wire.h` (incluida por defecto)
+   * `MPU9250_asukiaaa` (buscar "MPU9250_asukiaaa" en el gestor de librerías)
+
+   También asegurarse de tener instalado el **soporte de placas ESP32** en el Arduino IDE (Archivo → Preferencias → URLs adicionales de gestor de tarjetas).
+
+3. **Configuración previa:**
+   * Editar en el código las credenciales de WiFi:
+     ```cpp
+     const char* ssid = "TU_RED_WIFI";
+     const char* password = "TU_CONTRASEÑA";
+     ```
+   * Verificar la URL del servidor (`serverName`) y reemplazarla con la del servidor en Replit donde se alojarán los datos.
+
+4. **Ejecución:**
+   * Conectar el ESP32 por USB a la computadora.
+   * Seleccionar la placa correcta (ESP32 Dev Module) y el puerto en el Arduino IDE.
+   * Subir (Upload) el código al ESP32.
+   * Abrir el Monitor Serial (115200 baudios) para verificar la conexión WiFi y el envío de datos.
+   * Acceder a la página web del servidor (Replit) para visualizar los datos en tiempo real y las alertas.
 ---
 
 ## 📐 Diseño del Sistema
@@ -99,5 +133,11 @@ World Health Organization. (1997). Thermal protection of the newborn: A practica
 
 ## 📌 Notas adicionales
 
->Conseguír Sensores Termicos y hacerlos funcionar con arduino. 
-*Espacio para dejar cualquier comentario útil, como pendientes, acuerdos del grupo, consideraciones especiales, etc.*
+Conseguir sensores térmicos y hacerlos funcionar con Arduino.
+
+* Verificar la calibración del sensor LM35 con un termómetro de referencia antes de la presentación final.
+* Confirmar el valor real de las resistencias del divisor de voltaje para ajustar correctamente el offset de temperatura.
+* Pendiente probar el sistema con mediciones reales en condiciones controladas (no solo en laboratorio).
+* Revisar estabilidad de la conexión WiFi y el servidor Replit, ya que puede haber tiempos de inactividad (sleep) en el plan gratuito.
+* Considerar agregar un sensor adicional (ej. SpO2) como posible mejora futura, fuera del alcance actual.
+* Pendiente acordar con el grupo quién se encarga de la documentación final y quién de las pruebas de hardware.
