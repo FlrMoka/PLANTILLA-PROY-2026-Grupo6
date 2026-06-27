@@ -37,7 +37,7 @@ Repositorio del grupo 6 para el proyecto del ramo *Proyecto Inicial (IWG400)* â€
   - Ej: Python, C (arduino)
 - Microcontroladores
   - Arduino UNO Q, Esp32 U
-- Sensores LM35, MPU-92
+- Sensores LM35, MPU-9250
 
 ---
 
