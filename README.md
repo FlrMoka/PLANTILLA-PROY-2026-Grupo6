@@ -18,11 +18,19 @@ Repositorio del grupo 6 para el proyecto del ramo *Proyecto Inicial (IWG400)* �
 
 ## 🎯 Objetivos
 
-- Objetivo general:
-  - Facilitar la monitorización de signos vitales en personas pertenecientes a infantes.
-- Objetivos específicos:
-  - Tener un aviso facil para saber si la temperatura de la persona está en el rango aceptable de temperaturas (Considerando su edad)
-  - Para que los padres tengan un poco más de tranquilidad a la hora del horario de sueño.
+**Objetivo general:**
+
+* Facilitar la monitorización de signos vitales (temperatura corporal y frecuencia respiratoria) en lactantes, mediante un sistema electrónico de bajo costo que permita a los padres o cuidadores supervisar su estado de salud de forma remota y en tiempo real.
+
+**Objetivos específicos:**
+
+* Diseñar un sistema de adquisición de datos basado en ESP32 capaz de medir la temperatura corporal y la frecuencia respiratoria del lactante mediante sensores LM35 y MPU9250.
+
+* Implementar un mecanismo de alerta visual/web que notifique de forma clara y sencilla cuando los valores medidos se encuentren fuera de los rangos normales considerados según la edad del lactante.
+
+* Transmitir los datos sensados de forma inalámbrica a un servidor web, permitiendo su visualización en tiempo real desde cualquier dispositivo con acceso a internet.
+
+* Brindar mayor tranquilidad a los padres durante el horario de sueño del bebé, al contar con un monitoreo continuo y automatizado que reduzca la necesidad de supervisión constante y manual.
 ---
 
 ## 🧩 Alcance del proyecto
