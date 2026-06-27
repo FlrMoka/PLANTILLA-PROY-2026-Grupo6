@@ -12,8 +12,9 @@ Repositorio del grupo 6 para el proyecto del ramo *Proyecto Inicial (IWG400)* �
 
 ## 📝 Descripción breve del proyecto
 
-> *Medidor de signos vitales para bebés, para lograr el monitoreo constante de respiraciones por minuto y temperatura. 
-Mientras los valores nombrados anteriormente se mantengan en los rangos establecidos como normales para su edad, tan solo se entregará en la pantalla los valores médicos. Cuando estos valores se encuentren alterados o con diferencias significativas, se envía una alerta a la persona que este a cargo del cuidado del infante, a través de Arduino Uno Q mediante vía wi-fi local hacia la pantalla TFT, la cual activará un buzzer que emitirá un sonido para alertar esto.*
+> *Este proyecto es un sistema de monitoreo continuo para lactantes basado en un ESP32, que usa un sensor MPU9250 para calcular la frecuencia respiratoria y un sensor de temperatura LM35 para medir la temperatura corporal del bebé.
+
+Los datos sensados se envían vía WiFi a un servidor web alojado en Replit, donde se muestran en tiempo real en una página web y se generan alertas automáticas cuando la temperatura o la frecuencia respiratoria salen de los rangos normales para su edad.*
 
 ---
 
