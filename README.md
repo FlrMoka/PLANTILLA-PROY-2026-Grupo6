@@ -65,7 +65,7 @@ Repositorio del grupo 6 para el proyecto del ramo *Proyecto Inicial (IWG400)* �
 ---
 
 ## 📐 Diseño del Sistema
-![Diagrama de Conexiones](.Imagenes/design.jpg)
+![Diagrama de Conexiones](Transmisor.png)
 
 -Imagen ilustrativa de como se vería las conexiónes de nuestro proyecto.
 
