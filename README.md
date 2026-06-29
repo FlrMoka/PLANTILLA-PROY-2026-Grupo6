@@ -199,7 +199,7 @@ flowchart TD
 ```
 
 
-![Diagrama de Conexiones](Transmisor.png)
+![Diagrama de Conexiones](assets/Transmisor.png)
 
 -Imagen ilustrativa de como se vería las conexiónes de nuestro proyecto.
 
