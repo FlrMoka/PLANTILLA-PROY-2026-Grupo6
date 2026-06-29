@@ -35,27 +35,57 @@ Repositorio del grupo 6 para el proyecto del ramo *Proyecto Inicial (IWG400)* �
 
 ## 🧩 Alcance del proyecto
 
-Cubre:
+Dentro del alcance:
 * Medición de temperatura corporal y frecuencia respiratoria del lactante mediante sensores conectados al ESP32.
 * Transmisión inalámbrica de los datos a un servidor web.
 * Visualización en tiempo real de los datos en una página web.
 * Alertas automáticas cuando los valores salen de los rangos normales según la edad.
 
-No cubre (limitaciones):
+Fuera del alcance (limitaciones):
 * No reemplaza la supervisión médica ni constituye un diagnóstico clínico.
 * No mide otros signos vitales (oxigenación, ritmo cardíaco, etc.).
-* No incluye notificaciones móviles, solo alertas en la página web.
+* No incluye notificaciones móviles, ni alarmas físicas solo alertas en la página web.
 * No ha sido validado clínicamente en lactantes reales; es un prototipo.
-*
+
 ---
 
 ## 🛠️ Tecnologías y herramientas utilizadas
 
-- Lenguaje(s) de programación:
-  - Ej: Python, C (arduino)
-- Microcontroladores
-  - Arduino UNO Q, Esp32 U
-- Sensores LM35, MPU-9250
+### Lenguajes de Programación
+- **C/C++** — Firmware del ESP32 (Arduino IDE)
+- **Python** — Servidor HTTP en el Arduino UNO Q (Arduino App Lab)
+- **HTML / CSS / JavaScript** — Interfaz web del dashboard (embebida en Flask)
+### Microcontroladores
+ 
+| Dispositivo | Rol |
+|---|---|
+| **ESP32 (modelo U)** | Lectura de sensores LM35 y MPU9250, envío de datos vía WiFi |
+| **Arduino UNO Q** | Servidor HTTP intermedio; recibe del ESP32 y reenvía a Replit |
+ 
+### Sensores
+ 
+| Sensor | Magnitud medida | Conexión |
+|---|---|---|
+| **MPU9250** | Aceleración eje Y → frecuencia respiratoria (RPM) | I2C (pines 21/22 del ESP32) |
+| **LM35** | Temperatura corporal (°C) | Analógico (pin 34 del ESP32) |
+ 
+### Software y Plataformas
+ 
+| Herramienta | Uso |
+|---|---|
+| Arduino App Lab | IDE y entorno de ejecución del Arduino UNO Q |
+| Arduino IDE | Programación y carga del firmware al ESP32 |
+| Replit | Dashboard web en la nube (visualización + alertas) |
+| GitHub | Control de versiones y entrega del proyecto |
+ 
+### Librerías principales
+ 
+| Librería | Plataforma | Uso |
+|---|---|---|
+| `MPU9250_asukiaaa` | ESP32 | Lectura del acelerómetro MPU9250 |
+| `WiFi.h` + `HTTPClient.h` | ESP32 | Conexión WiFi y envío HTTP |
+| `Arduino_RouterBridge` | Arduino UNO Q | Comunicación Python ↔ sketch |
+| `flask` + `requests` | Arduino UNO Q (Python) | Servidor HTTP y reenvío a Replit |
 
 ---
 
@@ -107,10 +137,34 @@ No cubre (limitaciones):
 ---
 
 ## 📐 Diseño del Sistema
+```mermaid
+flowchart TD
+    ESP[" ESP32\nLM35 · Temperatura corporal\nMPU9250 · Frecuencia respiratoria"]
+    ARD[" Arduino UNO Q\nPython HTTP Server\nFlask — puerto 8080"]
+    REP["☁️ Dashboard Replit\nFlask + HTML/JS\nAlmacena y publica datos"]
+    NAV["👨‍👩‍👧 Navegador del Cuidador\nVisualización en tiempo real\nAlertas automáticas en pantalla"]
+
+    ESP -->|"HTTP POST — cada 1s\n{ temperature, breathing_rate,\n  device_id: esp32-baby }"| ARD
+    ARD -->|"HTTP POST\n/api/sensor/data"| REP
+    REP -->|"GET /data — cada 1s"| NAV
+
+    style ESP fill:#0d47a1,stroke:#90caf9,stroke-width:3px,color:#e3f2fd
+    style ARD fill:#1b5e20,stroke:#a5d6a7,stroke-width:3px,color:#e8f5e9
+    style REP fill:#4a148c,stroke:#ce93d8,stroke-width:3px,color:#f3e5f5
+    style NAV fill:#e65100,stroke:#ffcc02,stroke-width:3px,color:#fff8e1
+```
+
+
 ![Diagrama de Conexiones](Transmisor.png)
 
 -Imagen ilustrativa de como se vería las conexiónes de nuestro proyecto.
 
+### Rangos de alerta implementados
+ 
+| Parámetro | Rango normal | Estado de alerta |
+|---|---|---|
+| Temperatura | 35.6 °C – 37.9 °C | `< 35.6 °C` → Hipotermia · `> 37.9 °C` → Fiebre |
+| Frecuencia respiratoria | 30 – 60 RPM | `< 30 RPM` → Apnea · `> 60 RPM` → Taquipnea |
 ---
 
 ## 📅 Cronograma de trabajo
@@ -121,23 +175,31 @@ No cubre (limitaciones):
 
 ## 📚 Bibliografía
 
-Frecuencia respiratoria (respiraciones por minuto) en lactantes:
-
+- Frecuencia respiratoria (respiraciones por minuto) en lactantes:
 American Academy of Pediatrics. (s.f.). Fever and your baby. HealthyChildren.org. https://www.healthychildren.org/English/health-issues/conditions/fever/Pages/Fever-and-Your-Baby.aspx
 
-Temperatura corporal en lactantes:
-
+- Temperatura corporal en lactantes: 
 World Health Organization. (1997). Thermal protection of the newborn: A practical guide. WHO. https://www.who.int/publications/i/item/WHO-RHT-MSM-97-2
 
+- Documentación Arduino UNO Q — Arduino App Lab:
+https://docs.arduino.cc/arduino-app-lab/
+
+- MPU9250 Library (asukiaaa): 
+https://github.com/asukiaaa/MPU9250_asukiaaa
+- LM35 Datasheet — Texas Instruments: 
+https://www.ti.com/product/LM35
 ---
 
 ## 📌 Notas adicionales
 
 Conseguir sensores térmicos y hacerlos funcionar con Arduino.
 
+* El servidor Python del Arduino UNO Q debe iniciarse manualmente desde la terminal de App Lab con el comando indicado en el paso 3.
+* El dashboard de Replit es público y muestra los últimos valores recibidos con actualización automática cada 1 segundo.
 * Verificar la calibración del sensor LM35 con un termómetro de referencia antes de la presentación final.
 * Confirmar el valor real de las resistencias del divisor de voltaje para ajustar correctamente el offset de temperatura.
 * Pendiente probar el sistema con mediciones reales en condiciones controladas (no solo en laboratorio).
 * Revisar estabilidad de la conexión WiFi y el servidor Replit, ya que puede haber tiempos de inactividad (sleep) en el plan gratuito.
 * Considerar agregar un sensor adicional (ej. SpO2) como posible mejora futura, fuera del alcance actual.
 * Pendiente acordar con el grupo quién se encarga de la documentación final y quién de las pruebas de hardware.
+* El sistema detecta automáticamente la ausencia de movimiento (7 segundos sin señal → RPM = 0) para evitar lecturas falsas en reposo.
