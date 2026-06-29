@@ -16,6 +16,9 @@ Repositorio del grupo 6 para el proyecto del ramo *Proyecto Inicial (IWG400)* �
 
 ---
 
+## 🎬 Video de Demostración
+ https://youtu.be/bwz-503Oki4?feature=shared
+ 
 ## 🎯 Objetivos
 
 **Objetivo general:**
@@ -89,51 +92,92 @@ Fuera del alcance (limitaciones):
 
 ---
 
-## 🗂️ Estructura del repositorio
-
+## 🗂️ Estructura del Repositorio
+ 
 ```
-/PROY-2026-GRUPO-Grupo6
+PROY-2026-GRUPO6/
 │
-├── docs/               # Documentación general y reportes
-├── src/                # Código fuente del proyecto
-├── tests/              # Casos de prueba
-├── Imagenes/ 
-└── README.md           # Este archivo
+├── src/                              # Código fuente del proyecto
+│   ├── esp32/
+│   │   └── esp32_baby_monitor.ino   # Firmware del ESP32 (sensores + WiFi)
+│   ├── arduino_1q/
+│   │   ├── sketch.ino               # Sketch del Arduino UNO Q
+│   │   └── arduino_server.py        # Servidor HTTP Python (App Lab)
+│   └── dashboard/
+│       ├── main.py                  # Dashboard Flask en Replit
+│       └── requirements.txt         # Dependencias Python del dashboard
+│
+├── docs/
+│   └── Carta_Gantt_Grupo6.pdf       # Cronograma de trabajo
+│
+├── assets/
+│   └── Transmisor.png               # Diagrama de conexiones del hardware
+│
+├── .gitignore
+└── README.md
 ```
-
+ 
 ---
-
+ 
 ## 🚀 Instrucciones de Instalación y Uso
-
-1. **Clonar el repositorio:**
-   ```
-   git clone https://github.com/tu-usuario/tu-repositorio.git
-   ```
-
-2. **Dependencias (Arduino/ESP32):**
-
-   Desde el Arduino IDE, instalar las siguientes librerías (Herramientas → Administrar Bibliotecas):
-   * `WiFi.h` (incluida por defecto con el core de ESP32)
-   * `HTTPClient.h` (incluida por defecto con el core de ESP32)
-   * `Wire.h` (incluida por defecto)
-   * `MPU9250_asukiaaa` (buscar "MPU9250_asukiaaa" en el gestor de librerías)
-
-   También asegurarse de tener instalado el **soporte de placas ESP32** en el Arduino IDE (Archivo → Preferencias → URLs adicionales de gestor de tarjetas).
-
-3. **Configuración previa:**
-   * Editar en el código las credenciales de WiFi:
-     ```cpp
-     const char* ssid = "TU_RED_WIFI";
-     const char* password = "TU_CONTRASEÑA";
-     ```
-   * Verificar la URL del servidor (`serverName`) y reemplazarla con la del servidor en Replit donde se alojarán los datos.
-
-4. **Ejecución:**
-   * Conectar el ESP32 por USB a la computadora.
-   * Seleccionar la placa correcta (ESP32 Dev Module) y el puerto en el Arduino IDE.
-   * Subir (Upload) el código al ESP32.
-   * Abrir el Monitor Serial (115200 baudios) para verificar la conexión WiFi y el envío de datos.
-   * Acceder a la página web del servidor (Replit) para visualizar los datos en tiempo real y las alertas.
+ 
+### Requisitos previos
+- Arduino IDE 2.x o superior
+- Arduino App Lab (aplicación de escritorio)
+- Cuenta en [Replit](https://replit.com) para el dashboard web
+- Red WiFi disponible
+### 1. Clonar el repositorio
+ 
+```bash
+git clone https://github.com/FlrMoka/PLANTILLA-PROY-2026-Grupo6.git
+cd PLANTILLA-PROY-2026-Grupo6
+```
+ 
+### 2. Configurar y subir el firmware del ESP32
+ 
+1. Abrir `src/esp32/esp32_baby_monitor.ino` en el **Arduino IDE**.
+2. Instalar las librerías necesarias desde **Herramientas → Administrar Bibliotecas**:
+   - `MPU9250_asukiaaa` (buscar por nombre exacto)
+   - `WiFi.h` y `HTTPClient.h` (incluidas con el core ESP32)
+3. Si no tienes el core ESP32, agregarlo en **Archivo → Preferencias → URLs adicionales**:
+```
+   https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+```
+4. Editar las credenciales en el código:
+```cpp
+   const char* ssid     = "NOMBRE_DE_TU_RED_WIFI";
+   const char* password = "CONTRASEÑA_WIFI";
+   const char* serverName = "http://IP_ARDUINO_1Q:8080/data";
+```
+5. Seleccionar la placa **ESP32 Dev Module** y el puerto correcto.
+6. Hacer clic en **Upload**.
+7. Verificar en el **Monitor Serial (115200 baudios)** que el ESP32 se conecta y envía datos correctamente.
+### 3. Ejecutar el servidor en el Arduino UNO Q
+ 
+1. Abrir **Arduino App Lab** y cargar el proyecto desde `src/arduino_1q/`.
+2. Presionar **Run** para compilar y desplegar el sketch.
+3. En la terminal integrada (`>_`), iniciar el servidor Python:
+```bash
+pip install flask requests
+kill $(lsof -t -i:8080) 2>/dev/null
+nohup python3 /home/arduino/ArduinoApps/proyecto/arduino_1q/arduino_server.py > /tmp/server.log 2>&1 &
+```
+ 
+4. Editar `DASHBOARD_API_URL` en `arduino_server.py` con la URL real de tu proyecto Replit antes de ejecutar.
+5. Verificar que el servidor esté activo:
+```bash
+ss -tlnp | grep 8080
+```
+ 
+### 4. Desplegar el dashboard en Replit
+ 
+1. Crear un proyecto en [Replit](https://replit.com) de tipo **Python**.
+2. Subir los archivos `src/dashboard/main.py` y `src/dashboard/requirements.txt`.
+3. Hacer clic en **Run** — Replit instalará las dependencias automáticamente.
+4. La URL pública del dashboard quedará disponible para acceder desde cualquier dispositivo.
+🔗 Dashboard actual: [https://esp-web-host--miguelllancao20.replit.app](https://esp-web-host--miguelllancao20.replit.app)
+ 
+---
 ---
 
 ## 📐 Diseño del Sistema
